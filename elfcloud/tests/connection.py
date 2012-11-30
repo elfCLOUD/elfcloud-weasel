@@ -1,9 +1,24 @@
 # -*- coding: utf-8 -*-
+"""
+Copyright 2010-2012 elfCLOUD / elfcloud.fi – SCIS Secure Cloud Infrastructure Services
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+"""
 import unittest
 import mock
 import StringIO
 
-from elfcloud.exceptions import HolviDataItemException
+from elfcloud.exceptions import ECDataItemException
 from elfcloud.connection import Connection
 
 
@@ -60,7 +75,7 @@ class TestConnection(unittest.TestCase):
     @mock.patch('urllib2.urlopen')
     def test_connection_make_transaction(self, MockUrllib):
         mock_instance1 = mock.Mock()
-        mock_instance1.headers = {'X-HOLVI-RESULT': 'OK'}
+        mock_instance1.headers = {'X-ELFCLOUD-RESULT': 'OK'}
         MockUrllib.return_value = mock_instance1
         headers = {}
         headers['Test-header'] = 'value'
@@ -68,8 +83,8 @@ class TestConnection(unittest.TestCase):
         connection = Connection(self.server)
         response = connection.make_transaction(headers, '/fetch')
         self.assertEquals(MockUrllib.call_args[0][0].headers, headers)
-        self.assertEquals(response.headers['X-HOLVI-RESULT'], 'OK')
+        self.assertEquals(response.headers['X-ELFCLOUD-RESULT'], 'OK')
 
-        mock_instance1.headers = {'X-HOLVI-RESULT': 'ERROR: 404 Not found'}
-        self.assertRaises(HolviDataItemException, connection.make_transaction, headers, '/fetch')
+        mock_instance1.headers = {'X-ELFCLOUD-RESULT': 'ERROR: 404 Not found'}
+        self.assertRaises(ECDataItemException, connection.make_transaction, headers, '/fetch')
 

@@ -1,8 +1,24 @@
+# -*- coding: utf-8 -*-
+"""
+Copyright 2010-2012 elfCLOUD / elfcloud.fi – SCIS Secure Cloud Infrastructure Services
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+"""
 from .utils import KeyFile
 import hashlib
 from Crypto.Cipher import AES
 
-from elfcloud.exceptions import HolviCryptException
+from elfcloud.exceptions import ECCryptException
 
 
 class FileCrypt(object):
@@ -22,9 +38,9 @@ class FileCrypt(object):
         iv = self._crypt_iv
 
         if not key or len(key) not in [16, 24, 32]:
-            raise HolviCryptException(900, 'Invalid encryption key')
+            raise ECCryptException(900, 'Invalid encryption key')
         if not iv or len(iv) != 16:
-            raise HolviCryptException(901, 'Invalid initialization vector')
+            raise ECCryptException(901, 'Invalid initialization vector')
 
         self._key_hash = KeyFile.calc_hash(iv, key)
 

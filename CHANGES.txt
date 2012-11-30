@@ -1,3 +1,13 @@
+
+1.2.1 -- Added licensing information
+
+1.2 -- Finalizing rebranding.
+
+	   Rebranding from Holvi.org to elfcloud.fi.
+		- Changed http headers
+		- Changed internal class names
+		- Changed default server url
+
 1.1 -- Changed to use API 1.1.
 
        Changed name from Holvi.org to elfCLOUD.fi.

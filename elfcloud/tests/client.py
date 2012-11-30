@@ -1,10 +1,26 @@
+# -*- coding: utf-8 -*-
+"""
+Copyright 2010-2012 elfCLOUD / elfcloud.fi – SCIS Secure Cloud Infrastructure Services
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+"""
 import unittest
 import mock
 
 import elfcloud.client as client
 from elfcloud.exceptions import (
-        HolviCryptException,
-        HolviAPIException,
+        ECCryptException,
+        ECAPIException,
     )
 from elfcloud.utils import ENC_AES256, ENC_NONE
 
@@ -158,7 +174,7 @@ class TestClientFunctions(unittest.TestCase):
     def test_change_encryption_mode(self):
         client = self.client
 
-        self.assertRaises(HolviCryptException, setattr, client, 'encryption_mode', "INVALID ENCRYPTION MODE")
+        self.assertRaises(ECCryptException, setattr, client, 'encryption_mode', "INVALID ENCRYPTION MODE")
         client.encryption_mode = ENC_NONE
         self.assertEquals(client.encryption_mode, ENC_NONE)
         client.encryption_mode = ENC_AES256
@@ -223,7 +239,7 @@ class TestClientFunctions(unittest.TestCase):
         self.assertEquals(client._request_size, 1024)
         self.assertRaises(ValueError, client.set_request_size, "asdfasdf")
         self.assertRaises(TypeError, client.set_request_size, None)
-        self.assertRaises(HolviAPIException, client.set_request_size, -1)
+        self.assertRaises(ECAPIException, client.set_request_size, -1)
 
     def test_auth(self):
         conn = mock.Mock()

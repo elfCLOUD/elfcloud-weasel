@@ -1,3 +1,19 @@
+# -*- coding: utf-8 -*-
+"""
+Copyright 2010-2012 elfCLOUD / elfcloud.fi – SCIS Secure Cloud Infrastructure Services
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+"""
 import unittest
 import mock
 import StringIO
@@ -5,7 +21,7 @@ import hashlib
 import base64
 
 import elfcloud.client as client
-from elfcloud.exceptions import HolviDataItemException, ClientException
+from elfcloud.exceptions import ECDataItemException, ClientException
 from elfcloud.dataitem import DataItem
 from elfcloud.filecrypt import FileIterator, CryptIterator
 from elfcloud.utils import ENC_AES256, ENC_NONE
@@ -46,11 +62,11 @@ class TestDataItem(unittest.TestCase):
 
     def test_fetch_data(self):
         headers = {}
-        headers['X-HOLVI-KEY'] = base64.b64encode(self.keyname)
-        headers['X-HOLVI-PARENT'] = self.parent_id
+        headers['X-ELFCLOUD-KEY'] = base64.b64encode(self.keyname)
+        headers['X-ELFCLOUD-PARENT'] = self.parent_id
 
         conn = mock.Mock()
-        conn.make_transaction.return_value = mock.Mock(headers={'X-HOLVI-HASH': "4321"})
+        conn.make_transaction.return_value = mock.Mock(headers={'X-ELFCLOUD-HASH': "4321"})
         self.client.connection = conn
 
         dataitem = DataItem(self.client, parent_id=self.parent_id, name=self.keyname)
@@ -73,12 +89,12 @@ class TestDataItem(unittest.TestCase):
         test_data.get_content_hash = lambda: "aabbccddeeff1122"
 
         headers = {}
-        headers['X-HOLVI-STORE-MODE'] = "new"
-        headers['X-HOLVI-KEY'] = base64.b64encode(self.keyname)
-        headers['X-HOLVI-PARENT'] = self.parent_id
-        headers['X-HOLVI-META'] = 'v1:TGS:tag1,tag2:DSC:NewDescription:ENC:NONE::'
+        headers['X-ELFCLOUD-STORE-MODE'] = "new"
+        headers['X-ELFCLOUD-KEY'] = base64.b64encode(self.keyname)
+        headers['X-ELFCLOUD-PARENT'] = self.parent_id
+        headers['X-ELFCLOUD-META'] = 'v1:TGS:tag1,tag2:DSC:NewDescription:ENC:NONE::'
         headers['Content-Type'] = 'application/octet-stream'
-        headers['X-HOLVI-HASH'] = md5.hexdigest()
+        headers['X-ELFCLOUD-HASH'] = md5.hexdigest()
         headers['Content-Length'] = len(test_data.read())
         test_data.seek(0)
 
@@ -98,25 +114,23 @@ class TestDataItem(unittest.TestCase):
         test_data.seek(0)
         self.client.set_encryption_key("12345678901234561234567890123456")
         self.client.encryption_mode = ENC_AES256
-        headers['X-HOLVI-META'] = 'v1:KHA:abcdef123456789:ENC:AES256::'
+        headers['X-ELFCLOUD-META'] = 'v1:KHA:abcdef123456789:ENC:AES256::'
 
         response = dataitem.store_data(test_data, method="new", offset=None, key_hash="abcdef123456789")
         self.assertEquals(response, None)
         conn.make_transaction.assert_called_with(headers, '/store', 'Some test data to be sent to server')
 
-        self.assertRaises(HolviDataItemException, dataitem.store_data, test_data, "new", offset=None, key_hash="abcdef123456789")
+        self.assertRaises(ECDataItemException, dataitem.store_data, test_data, "new", offset=None, key_hash="abcdef123456789")
 
         conn.reset_mock()
         test_data.seek(0)
         file_iter = FileIterator(test_data, 4)
-        test_md5 = hashlib.md5()
-        test_md5.update('ver')
         self.client.set_encryption_key("")
         self.client.encryption_mode = ENC_NONE
-        headers['X-HOLVI-META'] = 'v1:ENC:NONE::'
-        headers['X-HOLVI-HASH'] = test_md5.hexdigest()
+        headers['X-ELFCLOUD-META'] = 'v1:ENC:NONE::'
+        headers['X-ELFCLOUD-HASH'] = hashlib.md5("Some").hexdigest()
         headers['Content-Length'] = 3
-        headers['X-HOLVI-STORE-MODE'] = "append"
+        headers['X-ELFCLOUD-STORE-MODE'] = "append"
         response = dataitem.store_data(file_iter, "new", offset=None)
         self.assertEquals(response, None)
         self.assertEquals(conn.make_transaction.mock_calls[8], mock.call(headers, '/store', 'ver'))
@@ -124,17 +138,18 @@ class TestDataItem(unittest.TestCase):
     def test_store_data_del_kha_del_cha(self):
         test_data = StringIO.StringIO("Some test data to be sent to server")
         md5 = hashlib.md5()
-        md5.update(test_data.read())
+        data = test_data.read()
+        md5.update(data)
         test_data.seek(0)
         test_data.get_content_hash = lambda: "aabbccddeeff1122"
 
         headers = {}
-        headers['X-HOLVI-STORE-MODE'] = "replace"
-        headers['X-HOLVI-KEY'] = base64.b64encode(self.keyname)
-        headers['X-HOLVI-PARENT'] = self.parent_id
-        headers['X-HOLVI-META'] = 'v1:TGS:tag1,tag2:ENC:NONE:DSC:NewDescription::'
+        headers['X-ELFCLOUD-STORE-MODE'] = "replace"
+        headers['X-ELFCLOUD-KEY'] = base64.b64encode(self.keyname)
+        headers['X-ELFCLOUD-PARENT'] = self.parent_id
+        headers['X-ELFCLOUD-META'] = 'v1:TGS:tag1,tag2:ENC:NONE:DSC:NewDescription::'
         headers['Content-Type'] = 'application/octet-stream'
-        headers['X-HOLVI-HASH'] = md5.hexdigest()
+        headers['X-ELFCLOUD-HASH'] = md5.hexdigest()
         headers['Content-Length'] = len(test_data.read())
         test_data.seek(0)
 
@@ -177,17 +192,17 @@ class TestDataItem(unittest.TestCase):
         md5.update(test_data.read())
         test_data.seek(0)
         headers = {}
-        headers['X-HOLVI-STORE-MODE'] = "patch"
-        headers['X-HOLVI-KEY'] = base64.b64encode(self.keyname)
-        headers['X-HOLVI-PARENT'] = self.parent_id
-        headers['X-HOLVI-META'] = 'v1:A:B:C:D:ENC:NONE::'
+        headers['X-ELFCLOUD-STORE-MODE'] = "patch"
+        headers['X-ELFCLOUD-KEY'] = base64.b64encode(self.keyname)
+        headers['X-ELFCLOUD-PARENT'] = self.parent_id
+        headers['X-ELFCLOUD-META'] = 'v1:A:B:C:D:ENC:NONE::'
         headers['Content-Type'] = 'application/octet-stream'
-        headers['X-HOLVI-HASH'] = md5.hexdigest()
-        headers['X-HOLVI-OFFSET'] = 13
+        headers['X-ELFCLOUD-HASH'] = md5.hexdigest()
+        headers['X-ELFCLOUD-OFFSET'] = 13
         headers['Content-Length'] = len(test_data.read())
         test_data.seek(0)
 
-        response_headers = {'X-HOLVI-META': 'v1:A:B:C:D::'}
+        response_headers = {'X-ELFCLOUD-META': 'v1:A:B:C:D::'}
         conn = self._mock_client_make_request(name=self.keyname,
                                               parent_id=self.parent_id,
                                               meta='v1:A:B:C:D:ENC:NONE::',
@@ -202,10 +217,8 @@ class TestDataItem(unittest.TestCase):
         conn.make_transaction.assert_called_with(headers, '/store', 'Some test data to be sent to server')
         conn.reset_mock()
         test_data.seek(0)
-        test_md5 = hashlib.md5()
-        test_md5.update('ver')
-        headers['X-HOLVI-HASH'] = test_md5.hexdigest()
-        headers['X-HOLVI-OFFSET'] = 13 + len(test_data.read()) - 3  # start offset + len(content) - last chunk size
+        headers['X-ELFCLOUD-HASH'] = hashlib.md5("Some").hexdigest()
+        headers['X-ELFCLOUD-OFFSET'] = 13 + len(test_data.read()) - 3  # start offset + len(content) - last chunk size
         headers['Content-Length'] = 3
         test_data.seek(0)
         file_iter = FileIterator(test_data, 4)

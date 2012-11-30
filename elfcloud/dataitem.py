@@ -1,10 +1,24 @@
 # -*- coding: utf-8 -*-
+"""
+Copyright 2010-2012 elfCLOUD / elfcloud.fi – SCIS Secure Cloud Infrastructure Services
 
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+"""
 import utils
 import filecrypt
 import hashlib
 import base64
-from elfcloud.exceptions import HolviDataItemException
+from elfcloud.exceptions import ECDataItemException
 from elfcloud.exceptions import ClientException
 
 
@@ -40,18 +54,18 @@ class DataItem(object):
     @property
     def data(self):
         """Returns a dict that contains DataItem checksum and data.
-        Queries the elfCLOUD.fi server with dataitems's parent ID and returns a dictionary.
+        Queries the elfcloud.fi server with dataitems's parent ID and returns a dictionary.
         Dictionary contains keys 'data' and 'checksum'.
 
         """
         headers = {}
-        headers['X-HOLVI-KEY'] = base64.b64encode(self.name.encode("utf-8"))
-        headers['X-HOLVI-PARENT'] = self.parent_id
+        headers['X-ELFCLOUD-KEY'] = base64.b64encode(self.name.encode("utf-8"))
+        headers['X-ELFCLOUD-PARENT'] = self.parent_id
         url_suffix = "/fetch"
 
         response = self._client.connection.make_transaction(headers, url_suffix)
 
-        checksum = response.headers.get('X-HOLVI-HASH')
+        checksum = response.headers.get('X-ELFCLOUD-HASH')
         if self._client.encryption_mode == utils.ENC_AES256:
             self.key_data = self._client.crypt.decrypt(response, self._client._request_size)
         else:
@@ -120,7 +134,7 @@ class DataItem(object):
         return self._client.connection.make_request(method, params)
 
     def _get_item_info(self, result=None):
-        """Queries elfCLOUD.fi server for DataItem information.
+        """Queries elfcloud.fi server for DataItem information.
 
         """
         if result is None:
@@ -184,7 +198,7 @@ class DataItem(object):
         return self._client.connection.make_request(method, params)
 
     def store_data(self, data, method, offset=None, description=None, tags=None, key_hash=None):
-        """Stores data to elfCLOUD.fi server.
+        """Stores data to elfcloud.fi server.
 
         :param data: File-like object to be stored.
         :param method: Storing method ['new', 'replace', 'patch', 'append'].
@@ -197,9 +211,9 @@ class DataItem(object):
         """
 
         headers = {}
-        headers['X-HOLVI-STORE-MODE'] = method
-        headers['X-HOLVI-KEY'] = base64.b64encode(self.name.encode("utf-8"))
-        headers['X-HOLVI-PARENT'] = self.parent_id
+        headers['X-ELFCLOUD-STORE-MODE'] = method
+        headers['X-ELFCLOUD-KEY'] = base64.b64encode(self.name.encode("utf-8"))
+        headers['X-ELFCLOUD-PARENT'] = self.parent_id
 
         meta_dict = {}
         if method != 'new':
@@ -210,7 +224,7 @@ class DataItem(object):
         if method == 'patch':
             if offset is None:
                 raise ClientException("Offset must be given when using 'patch'-method")
-            headers['X-HOLVI-OFFSET'] = int(offset)
+            headers['X-ELFCLOUD-OFFSET'] = int(offset)
 
         meta_dict.update({
             '__version__': self._client.__META_VERSION__,
@@ -237,7 +251,7 @@ class DataItem(object):
         if 'CHA' in meta_dict:
             del meta_dict['CHA']
 
-        headers['X-HOLVI-META'] = utils.MetaParser.serialize(meta_dict)
+        headers['X-ELFCLOUD-META'] = utils.MetaParser.serialize(meta_dict)
 
         headers['Content-Type'] = 'application/octet-stream'
         url_suffix = "/store"
@@ -246,23 +260,23 @@ class DataItem(object):
             data_chunk = data.next()
             md5 = hashlib.md5()
             md5.update(data_chunk)
-            headers['X-HOLVI-HASH'] = md5.hexdigest()
+            headers['X-ELFCLOUD-HASH'] = md5.hexdigest()
             headers['Content-Length'] = len(data_chunk)
             self._client.connection.make_transaction(headers, url_suffix, data_chunk)
             if method == 'patch':
                 offset += len(data_chunk)
         except StopIteration:
-            raise HolviDataItemException(700, "Empty content")
+            raise ECDataItemException(700, "Empty content")
 
         for data_chunk in data:
             md5 = hashlib.md5()
             md5.update(data_chunk)
-            headers['X-HOLVI-HASH'] = md5.hexdigest()
+            #headers['X-ELFCLOUD-HASH'] = md5.hexdigest()
             headers['Content-Length'] = len(data_chunk)
             if method != 'patch':
-                headers['X-HOLVI-STORE-MODE'] = 'append'
+                headers['X-ELFCLOUD-STORE-MODE'] = 'append'
             elif method == 'patch':
-                headers['X-HOLVI-OFFSET'] = offset
+                headers['X-ELFCLOUD-OFFSET'] = offset
                 offset += len(data_chunk)
             self._client.connection.make_transaction(headers, url_suffix, data_chunk)
 

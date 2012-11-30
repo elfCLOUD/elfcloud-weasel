@@ -1,8 +1,23 @@
 # -*- coding: utf-8 -*-
+"""
+Copyright 2010-2012 elfCLOUD / elfcloud.fi – SCIS Secure Cloud Infrastructure Services
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+"""
 import re
 import hashlib
 
-from .exceptions import HolviCryptException
+from .exceptions import ECCryptException
 from .exceptions import ClientMetaException
 from .exceptions import ClientKeyFileException
 
@@ -20,7 +35,7 @@ def validate_encryption_mode(level, throw_exception=True):
     if level in [ENC_NONE, ENC_AES128, ENC_AES192, ENC_AES256]:
         return True
     if throw_exception:
-        raise HolviCryptException(901, 'Invalid encryption mode')
+        raise ECCryptException(901, 'Invalid encryption mode')
     return False
 
 

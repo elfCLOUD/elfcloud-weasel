@@ -1,3 +1,20 @@
+# -*- coding: utf-8 -*-
+"""
+Copyright 2010-2012 elfCLOUD / elfcloud.fi – SCIS Secure Cloud Infrastructure Services
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ """
+
 import os
 from setuptools import setup, find_packages
 
@@ -17,8 +34,8 @@ test_requires = [
 ]
 
 setup(name='elfcloud-weasel',
-      version = "1.1",
-      description='elfCLOUD.fi Weasel',
+      version="1.2.1",
+      description='elfcloud.fi Weasel',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
         "Programming Language :: Python",
@@ -26,10 +43,13 @@ setup(name='elfcloud-weasel',
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: System :: Distributed Computing",
         "Topic :: Utilities",
+        "License :: OSI Approved :: Apache Software License",
+        "Environment :: Console"
         ],
-      author='elfCLOUD',
+      author='elfcloud',
       author_email='support.dev@elfcloud.fi',
       url='http://elfcloud.fi/',
+      license='See LICENSE.txt',
       keywords='',
       packages=find_packages(),
       include_package_data=True,

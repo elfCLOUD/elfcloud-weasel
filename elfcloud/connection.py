@@ -1,14 +1,29 @@
 # -*- coding: utf-8 -*-
+"""
+Copyright 2010-2012 elfCLOUD / elfcloud.fi – SCIS Secure Cloud Infrastructure Services
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+"""
 import cookielib
 import urllib2
 import json
 
-from exceptions import HolviUnknownException, HolviDataItemException
+from exceptions import ECUnknownException, ECDataItemException
 import elfcloud.exceptions as exceptions
 
 
 class Connection(object):
-    """Connection provides methods for communicating with elfCLOUD.fi server
+    """Connection provides methods for communicating with elfcloud.fi server
 
     """
     __API_VERSION__ = "1.1"
@@ -44,12 +59,12 @@ class Connection(object):
         self._is_authed = True
 
     def make_request(self, method, params):
-        """Sends request to elfCLOUD.fi server with given method and parameters
+        """Sends request to elfcloud.fi server with given method and parameters
 
         :param method: Operation to be performed on server
         :param params: Parameters for given method
 
-        Sends a request to elfCLOUD.fi server and returns the result if the operation
+        Sends a request to elfcloud.fi server and returns the result if the operation
         was succesful.
 
         """
@@ -75,13 +90,13 @@ class Connection(object):
             self._handle_exception(response)
 
     def make_transaction(self, headers, url_suffix, data=None):
-        """Creates a transaction (download / upload) to elfCLOUD.fi server.
+        """Creates a transaction (download / upload) to elfcloud.fi server.
 
         :param headers: Headers to be added to the request
         :param url_suffix: '/store', '/fetch' depending on the direction of the transaction
         :param data: Data chunk to be added to request when POSTing data
 
-        Sends the request with given headers to elfCLOUD.fi server.
+        Sends the request with given headers to elfcloud.fi server.
         """
         url = self._server_url + self.__API_VERSION__ + url_suffix
         request = urllib2.Request(url)
@@ -91,12 +106,12 @@ class Connection(object):
         request.data = data
         response = urllib2.urlopen(request)
 
-        result = response.headers.get('X-HOLVI-RESULT')
+        result = response.headers.get('X-ELFCLOUD-RESULT')
         if result == 'OK':
             return response
         else:
             err_type, err_id, err_message = result.split(' ', 2)  # Format is 'ERROR: Err# ErrMessage'
-            raise HolviDataItemException(err_id, err_message)
+            raise ECDataItemException(err_id, err_message)
 
     def _handle_exception(self, response):
         """Handles the exceptions in request responses
@@ -107,7 +122,7 @@ class Connection(object):
         """
         exception = response.get('error')
         if not exception:
-            raise HolviUnknownException()
+            raise ECUnknownException()
 
         message = exception.get('message')
         code = exception.get('code')
@@ -116,4 +131,4 @@ class Connection(object):
         if type(data) in [unicode, str] and hasattr(exceptions, data):
             raise getattr(exceptions, data)(code, message)
         else:
-            raise HolviUnknownException("Unknown exception")
+            raise ECUnknownException("Unknown exception")

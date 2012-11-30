@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# elfCLOUD.fi Weasel documentation build configuration file, created by
+# elfcloud.fi Weasel documentation build configuration file, created by
 # sphinx-quickstart on Fri Jul 13 11:35:57 2012.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -40,8 +40,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'elfCLOUD.fi Weasel'
-copyright = u'2012, elfCLOUD.fi Weasel'
+project = u'elfcloud.fi Weasel'
+copyright = u'2012, elfcloud.fi Weasel'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -183,8 +183,8 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'elfclouddoc.tex', u'elfCLOUD.fi Weasel',
-   u'elfCLOUD.fi Weasel', 'manual'),
+  ('index', 'elfclouddoc.tex', u'elfcloud.fi Weasel',
+   u'elfcloud.fi Weasel', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -213,8 +213,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'elfcloud', u'elfCLOUD.fi Weasel',
-     [u'elfCLOUD.fi Weasel'], 1)
+    ('index', 'elfcloud', u'elfcloud.fi Weasel',
+     [u'elfcloud.fi Weasel'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -227,8 +227,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'elfcloud', u'elfCLOUD.fi Weasel',
-   u'elfCLOUD.fi Weasel', 'elfcloud', 'One line description of project.',
+  ('index', 'elfcloud', u'elfcloud.fi Weasel',
+   u'elfcloud.fi Weasel', 'elfcloud', 'One line description of project.',
    'Miscellaneous'),
 ]
 

@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+"""
+Copyright 2010-2012 elfCLOUD / elfcloud.fi – SCIS Secure Cloud Infrastructure Services
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+"""
 import sys
 import os
 import argparse
@@ -7,10 +22,9 @@ import elfcloud
 import codecs
 import csv
 import urllib2
-import urlparse
 
 from elfcloud.exceptions import ClientException
-from elfcloud.exceptions import HolviException
+from elfcloud.exceptions import ECException
 
 
 def tag_parser(s):
@@ -22,23 +36,23 @@ def tag_parser(s):
 
 
 def parse_args(args):
-    parser = argparse.ArgumentParser(description='elfCLOUD.fi Weasel', usage="ecw [-u USERNAME] [-p PASSWORD] [-k APIKEY] [-s SERVER] ACTION [options]")
-    parser.add_argument('--version', action='version', version='elfCLOUD.fi Weasel 1.1')
+    parser = argparse.ArgumentParser(description='elfcloud.fi Weasel', usage="ecw [-u USERNAME] [-p PASSWORD] [-k APIKEY] [-s SERVER] ACTION [options]")
+    parser.add_argument('--version', action='version', version='elfcloud.fi Weasel 1.2')
     auth_group = parser.add_argument_group('authentication')
     auth_group.add_argument('--user', '-u', action="store", default="", help="username to be used for authentication (or set ECW_USER environment variable)")
     auth_group.add_argument('--password', '-p', action="store", default="", help="password to be used for authentication (or set ECW_PASS environment variable)")
-    auth_group.add_argument('--apikey', '-k', action="store", default=elfcloud.utils.APIKEY_DEFAULT, help="client's API-key (defaults to elfCLOUD.fi Weasel default key)")
-    auth_group.add_argument('--server', '-s', action="store", default=None, help="server to be used (defaults to elfCLOUD.fi (or holvi.org) server automatically)")
+    auth_group.add_argument('--apikey', '-k', action="store", default=elfcloud.utils.APIKEY_DEFAULT, help="client's API-key (defaults to elfcloud.fi Weasel default key)")
+    auth_group.add_argument('--server', '-s', action="store", default=elfcloud.utils.SERVER_DEFAULT, help="server to be used (defaults to elfcloud.fi)")
 
     cmd_parsers = parser.add_subparsers(title='available actions')
 
     add_vault_parser = cmd_parsers.add_parser('add-vault', help="add a new vault")
-    add_vault_parser.add_argument('--name', '-n', required=True, help="Name for the new vault.")
-    add_vault_parser.add_argument('--type', '-t', default=elfcloud.utils.VAULT_TYPE_DEFAULT, help="Type for the new vault. Vault type defaults to fi.elfcloud.datastore. Default API key allows use of fi.elfcloud.datastore and fi.elfcloud.backup vault types.")
+    add_vault_parser.add_argument('--name', '-n', required=True, help="name for the new vault.")
+    add_vault_parser.add_argument('--type', '-t', default=elfcloud.utils.VAULT_TYPE_DEFAULT, help="type for the new vault. Vault type defaults to fi.elfcloud.datastore. Default API key allows use of fi.elfcloud.datastore and fi.elfcloud.backup vault types.")
     add_vault_parser.set_defaults(func=add_vault)
 
     list_vaults_parser = cmd_parsers.add_parser('list-vaults', help="list vaults")
-    list_vaults_parser.add_argument('--role', '-r', choices=('account', 'own', 'other'), help='relationship to vault: own / account / other')
+    list_vaults_parser.add_argument('--role', '-r', choices=("account", "own", "other"), help="relationship to vault: own / account / other")
     list_vaults_parser.add_argument('--id', '-id', help="id of the searched vault")
     list_vaults_parser.add_argument('--type', '-t', help="application type of the searched vault")
     list_vaults_parser.set_defaults(func=list_vaults)
@@ -58,7 +72,7 @@ def parse_args(args):
     add_cluster_parser.set_defaults(func=add_cluster)
 
     list_clusters_parser = cmd_parsers.add_parser('list-clusters', help="list clusters")
-    list_clusters_parser.add_argument('--id', '-id', required=True, help="parent id")  # Help message?
+    list_clusters_parser.add_argument('--id', '-id', required=True, help="parent id")
     list_clusters_parser.set_defaults(func=list_clusters)
 
     rename_cluster_parser = cmd_parsers.add_parser('rename-cluster', help="rename cluster")
@@ -166,32 +180,9 @@ def main(argv=sys.argv):
         if args.tags is None and args.description is None:
             parser.error("at least one of --tags and --description required")
 
-    if args.server is None:
-        if args.verbose:
-            print >> sys.stderr, "Selecting server automatically..."
-
-        req = urllib2.Request("http://elfcloud.fi/api.url")
-        resp = urllib2.urlopen(req, timeout=10)
-
-        parsed_url = urlparse.urlparse(resp.readline().strip())
-
-        if parsed_url.hostname not in ['my.holvi.org', 'api.elfcloud.fi', 'my.elfcloud.fi']:
-            raise Exception("Invalid hostname.")
-
-        if parsed_url.scheme != 'https':
-            raise Exception("Invalid scheme.")
-
-        args.server = parsed_url.geturl()
-
-        if args.verbose:
-            print >> sys.stderr, "Selected server:", repr(args.server)
-
-    if args.server is None:
-        raise Exception("No server provided, use --server/-s to provide valid API URL.")
-
     try:
         call_client_func(user, password, args.apikey, args.server, args.func, args)
-    except HolviException as e:
+    except ECException as e:
         print >> sys.stderr, e
         sys.exit(-1)
     except UnicodeError as e:

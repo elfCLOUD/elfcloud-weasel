@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+"""
+Copyright 2010-2012 elfCLOUD / elfcloud.fi – SCIS Secure Cloud Infrastructure Services
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+"""
 from decorator import decorator
 
 import utils
@@ -6,7 +21,7 @@ import filecrypt
 from .container import Cluster, Vault
 from .dataitem import DataItem
 from .connection import Connection
-from .exceptions import HolviAPIException
+from .exceptions import ECAPIException
 
 
 @decorator
@@ -21,7 +36,7 @@ def require_auth(fn, cls, *args, **kwargs):
 
 
 class Client(object):
-    """Client provides interface for performing elfCLOUD.fi server operations.
+    """Client provides interface for performing elfcloud.fi server operations.
     Client's Connection is used by Vault/Cluster and DataItem objects.
 
     """
@@ -156,7 +171,7 @@ class Client(object):
         """
         value = int(value)
         if value <= 0:
-            raise HolviAPIException(600, "Request size must be larger than 0")
+            raise ECAPIException(600, "Request size must be larger than 0")
         self._request_size = value
 
     def auth(self):
@@ -168,12 +183,12 @@ class Client(object):
 
     @require_auth
     def add_vault(self, name, vault_type=utils.VAULT_TYPE_DEFAULT):
-        """Adds a new Vault to elfCLOUD.fi server.
+        """Adds a new Vault to elfcloud.fi server.
 
         :param vault_type: type for Vault.
         :param name: name for the Vault.
 
-        Sends a request to add vault to elfCLOUD.fi server.
+        Sends a request to add vault to elfcloud.fi server.
         Returns the created Vault object.
         """
         method = "add_vault"
@@ -194,7 +209,7 @@ class Client(object):
         :param id_: ID of the vault to be searched.
         :param role: User's role to the vaults to be searched ['own', 'account', 'other'].
 
-        Queries the elfCLOUD.fi server for vaults using provided parameters.
+        Queries the elfcloud.fi server for vaults using provided parameters.
         Returns a list of Vault objects.
 
         """
@@ -217,7 +232,7 @@ class Client(object):
 
     @require_auth
     def remove_vault(self, vault_id=None):
-        """Removes a Vault from elfCLOUD.fi server.
+        """Removes a Vault from elfcloud.fi server.
 
         :param vault_id: id of the cluster.
 
@@ -230,12 +245,12 @@ class Client(object):
 
     @require_auth
     def add_cluster(self, name, parent_id):
-        """Adds a new Cluster to elfCLOUD.fi server.
+        """Adds a new Cluster to elfcloud.fi server.
 
         :param name: name of the created cluster.
         :param parent_id: id of the parent Cluster/Vault.
 
-        Sends a request to add cluster to elfCLOUD.fi server.
+        Sends a request to add cluster to elfcloud.fi server.
         Returns the created Cluster object.
         """
         method = "add_cluster"
@@ -268,7 +283,7 @@ class Client(object):
 
     @require_auth
     def remove_cluster(self, cluster_id=None):
-        """Removes a Cluster from elfCLOUD.fi server.
+        """Removes a Cluster from elfcloud.fi server.
 
         :param cluster_id: id of the cluster.
 
@@ -281,7 +296,7 @@ class Client(object):
 
     @require_auth
     def store_data(self, parent_id, key, p_data, method="new", offset=None, description=None, tags=None):
-        """Stores data to elfCLOUD.fi server.
+        """Stores data to elfcloud.fi server.
 
         :param parent_id: id of the parent Cluster/Vault where to store data to.
         :param key: name of the dataitem where to store data to.
@@ -309,7 +324,7 @@ class Client(object):
 
     @require_auth
     def fetch_data(self, parent_id, key):
-        """Retrieves data from elfCLOUD.fi server.
+        """Retrieves data from elfcloud.fi server.
 
         :param parent_id: id of the parent Cluster/Vault where to retrieve data from.
         :param key: name of the dataitem where to retrieve data from.
@@ -351,7 +366,7 @@ class Client(object):
 
     @require_auth
     def get_dataitem(self, parent_id, key):
-        """Retrieves dataitem information from elfCLOUD.fi server.
+        """Retrieves dataitem information from elfcloud.fi server.
 
         :param parent_id: id of the parent Cluster/Vault where to retrieve information from.
         :param key: name of the dataitem where to retrieve information from.
@@ -367,7 +382,7 @@ class Client(object):
 
     @require_auth
     def remove_dataitem(self, parent_id, key):
-        """Removes dataitem from elfCLOUD.fi server.
+        """Removes dataitem from elfcloud.fi server.
 
         :param parent_id: id of the parent Cluster/Vault where to dataitem is.
         :param key: name of the dataitem.

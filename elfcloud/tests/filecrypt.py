@@ -1,9 +1,25 @@
+# -*- coding: utf-8 -*-
+"""
+Copyright 2010-2012 elfCLOUD / elfcloud.fi – SCIS Secure Cloud Infrastructure Services
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+"""
 import unittest
 import StringIO
 import hashlib
 
 from elfcloud.exceptions import (
-        HolviCryptException
+        ECCryptException
     )
 from elfcloud.filecrypt import FileIterator, FileCrypt
 
@@ -14,13 +30,13 @@ class TestFileHandling(unittest.TestCase):
         original_data = StringIO.StringIO("test data to be iterated")
 
         enc_iterator = FileCrypt('Invalidkey', '1234567890123456')
-        self.assertRaises(HolviCryptException, enc_iterator.encrypt, original_data, 1)
+        self.assertRaises(ECCryptException, enc_iterator.encrypt, original_data, 1)
 
         enc_iterator = FileCrypt('12345678901234561234567890123456', 'InvalidIV')
-        self.assertRaises(HolviCryptException, enc_iterator.encrypt, original_data, 1)
+        self.assertRaises(ECCryptException, enc_iterator.encrypt, original_data, 1)
 
         enc_iterator = FileCrypt('Invalidkey', 'InvalidIV')
-        self.assertRaises(HolviCryptException, enc_iterator.encrypt, original_data, 1)
+        self.assertRaises(ECCryptException, enc_iterator.encrypt, original_data, 1)
 
         enc_iterator = FileCrypt('12345678901234561234567890123456', '1234567890123456')
 
@@ -36,13 +52,13 @@ class TestFileHandling(unittest.TestCase):
         data_dec_out = StringIO.StringIO()
 
         dec_iterator = FileCrypt('Invalidkey', '1234567890123456')
-        self.assertRaises(HolviCryptException, dec_iterator.decrypt, data_enc_out, 1)
+        self.assertRaises(ECCryptException, dec_iterator.decrypt, data_enc_out, 1)
 
         dec_iterator = FileCrypt('12345678901234561234567890123456', 'InvalidIV')
-        self.assertRaises(HolviCryptException, dec_iterator.decrypt, data_enc_out, 1)
+        self.assertRaises(ECCryptException, dec_iterator.decrypt, data_enc_out, 1)
 
         dec_iterator = FileCrypt('Invalidkey', 'InvalidIV')
-        self.assertRaises(HolviCryptException, dec_iterator.decrypt, data_enc_out, 1)
+        self.assertRaises(ECCryptException, dec_iterator.decrypt, data_enc_out, 1)
 
         dec_iterator = FileCrypt('12345678901234561234567890123456', '1234567890123456')
         decrypt = dec_iterator.decrypt(data_enc_out, 1)
